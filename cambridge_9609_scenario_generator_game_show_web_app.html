@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cambridge 9609 Business Scenario Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0b3c5d, #000);
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .slot-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 20px auto;
+    max-width: 1100px;
+  }
+
+  .slot {
+    background: black;
+    border: 3px solid gold;
+    border-radius: 12px;
+    padding: 15px;
+    min-height: 90px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px gold;
+  }
+
+  button {
+    padding: 18px 40px;
+    font-size: 1.4rem;
+    background: gold;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 0 20px gold;
+  }
+
+  button:hover { background: #ffdd55; }
+
+  .case-box, .teacher-box {
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #44ccee;
+    border-radius: 12px;
+    padding: 15px;
+    max-width: 1100px;
+    margin: 15px auto;
+    text-align: left;
+  }
+
+  .teacher-box { display: none; border-color: red; }
+
+  .toggle-teacher {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.8rem;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎰 Cambridge 9609 Business Scenario Generator 🎓</h1>
+<p>Game Show Mode for Whole-Class Revision</p>
+
+<div class="slot-container">
+  <div class="slot" id="slot-structure">Business Structure</div>
+  <div class="slot" id="slot-product">Product(s)</div>
+  <div class="slot" id="slot-culture">Leadership / Culture</div>
+  <div class="slot" id="slot-issue">Business Issue</div>
+  <div class="slot" id="slot-fact">Random Fact</div>
+</div>
+
+<button onclick="spinScenario()">🎰 Spin the Business Scenario</button>
+
+<div class="case-box" id="caseStudyBox"></div>
+
+<div class="teacher-box" id="teacherBox"></div>
+
+<button class="toggle-teacher" onclick="toggleTeacher()">Teacher Mode</button>
+
+<script>
+// ===== PROMPT BANKS (expand all year) =====
+const structures = [
+  "Sole trader retail business",
+  "Private limited manufacturing company",
+  "Public limited multinational corporation",
+  "Worker cooperative social enterprise",
+  "Family-owned partnership farm",
+  "Franchise fast-food outlet",
+  "State-owned utility provider",
+  "Digital platform start-up",
+  "Non-profit charity organisation",
+  "Multinational conglomerate",
+  "Private equity-backed logistics firm",
+  "Local independent service business",
+  "Online subscription-based company",
+  "Crowdfunded technology start-up",
+  "Government contractor"
+];
+
+const products = [
+  "eco-friendly clothing line",
+  "electric scooters",
+  "artisanal food products",
+  "mobile banking app",
+  "video streaming service",
+  "construction services",
+  "3D printing solutions",
+  "health and fitness wearable devices",
+  "luxury hotel services",
+  "renewable energy solutions",
+  "AI-based tutoring platform",
+  "organic farming produce",
+  "gaming consoles",
+  "online marketplace platform",
+  "pharmaceutical products"
+];
+
+const cultures = [
+  "autocratic leadership style",
+  "democratic participative management",
+  "transformational leadership culture",
+  "laissez-faire leadership approach",
+  "strong performance-based motivation system",
+  "bureaucratic hierarchical structure",
+  "innovative entrepreneurial culture",
+  "high-pressure sales-driven environment",
+  "employee-owned collaborative culture",
+  "family-dominated decision-making",
+  "multicultural international management team",
+  "remote-first digital workforce",
+  "unionised workforce with collective bargaining",
+  "flat organisational structure",
+  "centralised decision-making from headquarters"
+];
+
+const issues = [
+  "falling sales revenue",
+  "high labour turnover",
+  "increasing production costs",
+  "ethical concerns about suppliers",
+  "rapid technological change",
+  "economic recession reducing demand",
+  "negative social media publicity",
+  "new competitor entering the market",
+  "government regulation changes",
+  "cash flow problems",
+  "quality control failures",
+  "industrial action by employees",
+  "global supply chain disruption",
+  "sustainability pressure from stakeholders",
+  "cultural conflict in multinational teams"
+];
+
+const facts = [
+  "The business operates in three countries",
+  "The founder retains 60% ownership",
+  "The firm recently received venture capital funding",
+  "Employees receive performance bonuses",
+  "The firm targets Generation Z customers",
+  "Production is outsourced overseas",
+  "The business uses just-in-time inventory",
+  "Customer satisfaction scores have fallen",
+  "The firm is planning an IPO",
+  "The business recently expanded through mergers",
+  "The company has a strong CSR programme",
+  "The firm faces currency exchange risks",
+  "The business relies heavily on online sales",
+  "The company has a unionised workforce",
+  "The firm recently launched a new brand"
+];
+
+// Difficulty levels
+const questions = {
+  easy: [
+    "Define one key business term from the scenario (2 marks)",
+    "Identify one stakeholder affected by the issue (2 marks)"
+  ],
+  medium: [
+    "Analyse how the leadership style may influence employee motivation (8 marks)",
+    "Assess one method the business could use to solve the issue (8 marks)"
+  ],
+  hard: [
+    "Evaluate the effectiveness of different management strategies the business could use to solve the issue (12 marks)",
+    "Discuss the likely impact of the issue on stakeholders and business objectives (12 marks)"
+  ]
+};
+
+const markSchemes = {
+  easy: "Marks awarded for accurate definitions and identification of stakeholders.",
+  medium: "AO2 and AO3 required. Application to scenario and analysis of cause-effect relationships.",
+  hard: "AO1-AO4 required. Evaluation with balanced judgement, supported by application and analysis."
+};
+
+let difficulty = "medium";
+let teacherMode = false;
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function spinScenario() {
+  const s = pick(structures);
+  const p = pick(products);
+  const c = pick(cultures);
+  const i = pick(issues);
+  const f = pick(facts);
+
+  document.getElementById("slot-structure").innerText = s;
+  document.getElementById("slot-product").innerText = p;
+  document.getElementById("slot-culture").innerText = c;
+  document.getElementById("slot-issue").innerText = i;
+  document.getElementById("slot-fact").innerText = f;
+
+  // Quantitative data
+  const data = {
+    revenue: rand(200000, 5000000),
+    profitMargin: rand(2, 30),
+    marketShare: rand(1, 45),
+    staffTurnover: rand(5, 40)
+  };
+
+  const caseStudy = `A ${s} producing ${p} operates with a ${c}. The business is currently facing ${i}. ${f}. Recent financial data shows annual revenue of $${data.revenue}, a profit margin of ${data.profitMargin}%, market share of ${data.marketShare}%, and staff turnover of ${data.staffTurnover}%.`;
+
+  const qList = questions[difficulty].map(q => `<li>${q}</li>`).join("");
+
+  document.getElementById("caseStudyBox").innerHTML = `<h3>Case Study Scenario</h3><p>${caseStudy}</p><h3>Exam Questions (${difficulty.toUpperCase()})</h3><ol>${qList}</ol>`;
+
+  document.getElementById("teacherBox").innerHTML = `<h3>Teacher Mark Scheme</h3><p>${markSchemes[difficulty]}</p><p><b>Suggested quantitative analysis points:</b> Revenue trend, profit margin implications, productivity, HR implications.</p>`;
+}
+
+function toggleTeacher() {
+  teacherMode = !teacherMode;
+  document.getElementById("teacherBox").style.display = teacherMode ? "block" : "none";
+}
+
+// Keyboard shortcuts for classroom
+// 1,2,3 to change difficulty
+// T to toggle teacher mode
+window.addEventListener("keydown", e => {
+  if (e.key === "1") difficulty = "easy";
+  if (e.key === "2") difficulty = "medium";
+  if (e.key === "3") difficulty = "hard";
+  if (e.key.toLowerCase() === "t") toggleTeacher();
+});
+</script>
+
+</body>
+</html>
